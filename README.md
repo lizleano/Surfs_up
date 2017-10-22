@@ -19,20 +19,6 @@ import matplotlib.pyplot as plt
 ```python
 # Create Database Connection
 # ----------------------------------
-# Establish Connection to MySQL
-# DB_CONFIG_DICT = {
-#         'user': 'root',
-#         'password': 'Bernice1!',
-#         'host': 'localhost',
-#         'port': 3306,
-#     }
-
-# DB_CONN_FORMAT = "mysql://{user}:{password}@{host}:{port}/{database}"
-# DB_NAME = "hawaii_sqllite"
-# DB_CONN_URI_DEFAULT = (DB_CONN_FORMAT.format(
-#     database=DB_NAME,
-#     **DB_CONFIG_DICT))
-
 #  Establish SQL Lite connection
 DB_CONN_URI_DEFAULT = 'sqlite:///hawaii.sqlite'
 
@@ -98,7 +84,7 @@ first_row.__dict__
 
 
 
-    {'_sa_instance_state': <sqlalchemy.orm.state.InstanceState at 0x1c12e50af28>,
+    {'_sa_instance_state': <sqlalchemy.orm.state.InstanceState at 0x20057649f28>,
      'elevation': 3.0,
      'latitude': 21.2716,
      'longitude': -157.8168,
@@ -117,7 +103,7 @@ first_row.__dict__
 
 
 
-    {'_sa_instance_state': <sqlalchemy.orm.state.InstanceState at 0x1c12e58a588>,
+    {'_sa_instance_state': <sqlalchemy.orm.state.InstanceState at 0x200576c8588>,
      'date': datetime.date(2010, 1, 1),
      'measurement_id': 1,
      'prcp': 0.08,
@@ -158,44 +144,35 @@ def autolabel(rect):
     ax.text(rect.get_x()+rect.get_width()/2., 1.05*h, '%d'%int(h),
             ha='center', va='bottom', fontsize=12,rotation=90,fontweight='bold')
 
-def plotClimate(query, table):     
+def plotClimate(query, table):
+    # create a dataframe
     w_df = pd.DataFrame(query)
-    x_pos = np.arange(0, len(w_df['date']))
+    w_df.set_index('date',inplace=True)
+    w_df.sort_index(inplace=True)
     
-        
+    # setup tick values
+    dates = w_df.index.values
+    step_up = round(len(dates)/10, 0)    
+    xdateticks = np.arange(0,len(dates),int(step_up))   
+    xticklabels = np.array([dates[x] for x in xdateticks]) 
     
     fig = plt.figure(figsize=(8,6))
     ax = plt.subplot(111)
+    rect = ax.bar(np.arange(0, len(dates)), w_df['prcp'],width=1, linewidth=2, align='center', label="precipitation")
 
-    rect = ax.bar(x_pos, w_df['prcp'],width=1, linewidth=2, align='center', label="precipitation")
-
-    # set up tick values
-#     ax.set_xticks(x_pos)
-
-#     locator=MaxNLocator(prune='both', nbins='auto')
+    # assign tick values
+    ax.set_xticks(xdateticks) 
+    ax.set_xticklabels(xticklabels, rotation=45)
     
-    ax.set_xticklabels(w_df['date'], rotation=45) 
+    # assign y limits so all graphs have the same y limits for comparison
+    ax.set_ylim(0, 10, 2)
     
-    locator=MaxNLocator(prune='both', nbins=10)
-    ax.xaxis.set_major_locator(locator)
-
-    # setup tick labels
-    
-    ax.set_xticklabels(w_df['date'], rotation=45)
-#     plt.setp(rect.get_xticklabels()[::12], visible=False)
+    # set up title and xlabel
     ax.set_xlabel("Date", fontsize=9)
     title = ax.set_title("%s: Climate Precipation" % t.title(), fontsize=15)
     title.set_position([.5, 1.05])
     
-    plt.legend(loc="best")
-    fig1 = plt.gcf()
-    plt.show()
-    plt.draw()
-    fig1.savefig("%s_Climate_Precipation.png" % t )
-
-
-def plotClimate2(w_df, t):
-    w_df.plot(kind='bar', figsize=(8,6), use_index=True, title="%s: Climate Precipation" % t.title(), rot=45, label='precipitation')
+    # plot
     plt.legend(loc="best")
     fig1 = plt.gcf()
     plt.show()
@@ -246,7 +223,7 @@ for t in Base.classes.keys():
 
 
 
-    <matplotlib.figure.Figure at 0x1c12f086ef0>
+    <matplotlib.figure.Figure at 0x200581cc0f0>
 
 
 
@@ -254,7 +231,7 @@ for t in Base.classes.keys():
 
 
 
-    <matplotlib.figure.Figure at 0x1c12f2ec160>
+    <matplotlib.figure.Figure at 0x2005848fcc0>
 
 
 
@@ -262,7 +239,7 @@ for t in Base.classes.keys():
 
 
 
-    <matplotlib.figure.Figure at 0x1c12e9827b8>
+    <matplotlib.figure.Figure at 0x200583780f0>
 
 
 
@@ -273,7 +250,7 @@ for t in Base.classes.keys():
     
 
 
-    <matplotlib.figure.Figure at 0x1c12f218668>
+    <matplotlib.figure.Figure at 0x20057a89ef0>
 
 
 
@@ -281,7 +258,7 @@ for t in Base.classes.keys():
 
 
 
-    <matplotlib.figure.Figure at 0x1c12e50a518>
+    <matplotlib.figure.Figure at 0x20057d27f60>
 
 
 
@@ -289,7 +266,7 @@ for t in Base.classes.keys():
 
 
 
-    <matplotlib.figure.Figure at 0x1c12e9abfd0>
+    <matplotlib.figure.Figure at 0x20059affba8>
 
 
 
@@ -379,8 +356,6 @@ query_df = pd.read_sql(session.query(Measurement.tobs).\
     filter(Measurement.date >= start_date).filter(Measurement.date <= end_date).statement, session.bind)
 
 query_df.head()
-
-# 
 ```
 
 
@@ -456,7 +431,7 @@ fig1.savefig("%s_Histogram.png" % query_tobs[0])
 ```
 
 
-    <matplotlib.figure.Figure at 0x1c12f125f98>
+    <matplotlib.figure.Figure at 0x200580e49e8>
 
 
 
@@ -495,7 +470,7 @@ def calc_temps(enddate):
 temp_obs = calc_temps('2015-02-01')
 print("%s   %s   %s" % (temp_obs['minimum'], temp_obs['average'], temp_obs['maximum'])) 
 
-# Plot min, ag, and max temprature
+# Plot min, avg, and max temprature
 fig = plt.figure(figsize=(1.5,4))
 ax = plt.subplot(111)
 ax.yaxis.grid(True)
@@ -524,7 +499,7 @@ fig1.savefig("Trip Average Temp.png")
     
 
 
-    <matplotlib.figure.Figure at 0x1c131180e80>
+    <matplotlib.figure.Figure at 0x2005a2c5a58>
 
 
 
@@ -614,8 +589,10 @@ x = np.arange(len(rainfall_df.index))
 rainfall_df.plot(kind='area', stacked=False, alpha=0.5, colormap='Accent',
         title='Rainfall Area Plot')
 
+# assign tick values
 plt.xticks(x, date_list, rotation=45)
 
+# create legend
 [ax.legend(('tmin', 'tavg', 'tmax'),
            loc='lower left') for ax in plt.gcf().axes]
 fig1 = plt.gcf()
@@ -625,7 +602,7 @@ fig1.savefig("Rainfall Area Plot.png")
 ```
 
 
-    <matplotlib.figure.Figure at 0x1c1313f8a20>
+    <matplotlib.figure.Figure at 0x2005a35dc50>
 
 
 
