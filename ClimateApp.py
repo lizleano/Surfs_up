@@ -30,7 +30,7 @@ from flask import Flask, jsonify
 #     **DB_CONFIG_DICT))
 
 # Establish Connection to sqlite
-DB_CONN_URI_DEFAULT = 'sqlite:///C:\\datascience\\assignments\\Surfs_up\\hawaii.sqlite'
+DB_CONN_URI_DEFAULT = 'sqlite:///hawaii.sqlite'
 engine = create_engine(DB_CONN_URI_DEFAULT)
 
 # Establish Connection to sqlite
