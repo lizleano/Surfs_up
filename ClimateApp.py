@@ -243,7 +243,7 @@ def welcome():
         f"<br/>"
         f"Search Temperature (min, maximum, average)<br/>"
         f"/api/v1.0/startdate<br/>"
-        f"/api/v1.0/precipitation/startdate/enddate/<br/>"
+        f"/api/v1.0/startdate/enddate/<br/>"
     )
 
 @app.route("/api/v1.0/precipitation")
